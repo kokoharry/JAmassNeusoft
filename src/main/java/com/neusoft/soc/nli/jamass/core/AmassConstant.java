@@ -17,7 +17,19 @@ public class AmassConstant {
      */
     public static final String JAMASS_WORK_MODE_SPLIT = ",";
     /**
+     * JAmass 配置文件 key层级分隔符
+     */
+    public static final String JAMASS_CONFIGRATION_FILE_POINT = ".";
+    /**
      * sink package path
      */
     public static final String SINK_PACKAGE_PATH = "com.neusoft.soc.nli.jamass.sink";
+    /**
+     * sink kafka config server list key
+     */
+    public static final String SINK_KAFKASINK_CONFIG_SERVER_LIST_NAME = "server";
+    /**
+     * sink kafka config topic key
+     */
+    public static final String SINK_KAFKASINK_CONFIG_TOPIC_NAME = "topic";
 }

@@ -10,6 +10,7 @@ import com.neusoft.soc.nli.jamass.source.ICollectSource;
 import com.neusoft.soc.nli.jamass.source.TcpNettySource;
 import com.neusoft.soc.nli.jamass.source.UdpNettySource;
 import com.neusoft.soc.nli.jamass.source.UdpSocketSource;
+import com.neusoft.soc.nli.jamass.util.KafkaUtil;
 import com.neusoft.soc.nli.jamass.util.RegularExpressionUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -63,6 +64,8 @@ public class AmassEngine {
      */
     private RegularExpressionUtil regularExpressionUtil;
 
+    private KafkaUtil kafkaUtil;
+
     private Map<String,Set<DevPatternInfo>> ipDevMap;
 
     public AtomicInteger count = new AtomicInteger();
@@ -88,6 +91,9 @@ public class AmassEngine {
         initThreadPool();
         initIpDevMap();
         regularExpressionUtil = RegularExpressionUtil.getInstance();
+        this.setKafkaUtil(KafkaUtil.getInstance(
+                AmassConfigration.getKafkaConfig().get(AmassConstant.SINK_KAFKASINK_CONFIG_SERVER_LIST_NAME)
+        ));
     }
 
     /**
@@ -337,5 +343,13 @@ public class AmassEngine {
 
     public void setSinkPool(ThreadPoolExecutor sinkPool) {
         this.sinkPool = sinkPool;
+    }
+
+    public KafkaUtil getKafkaUtil() {
+        return kafkaUtil;
+    }
+
+    public void setKafkaUtil(KafkaUtil kafkaUtil) {
+        this.kafkaUtil = kafkaUtil;
     }
 }
