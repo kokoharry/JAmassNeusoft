@@ -87,6 +87,11 @@ public class DevTypeIdentifier implements IIdentify{
 
     @Override
     public void run() {
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         if(doIdentify(this.getAmassEvent())){
             //识别成功
             IParser parser = ParseFactory.createParser(this.getAmassEvent());

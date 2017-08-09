@@ -26,7 +26,12 @@ public class SysLogReceiver extends IReceiver {
         }
         IIdentify identify = new DevTypeIdentifier(amassEvent);
         //启动识别线程
-        AmassEngine.getInstance().getIdentifyPool().execute(identify);
+        try {
+            AmassEngine.getInstance().getEventIdentifyQueue().put(amassEvent);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+//        AmassEngine.getInstance().getIdentifyPool().execute(identify);
     }
 
 }

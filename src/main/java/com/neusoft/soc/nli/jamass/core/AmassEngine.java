@@ -6,6 +6,8 @@ import com.neusoft.soc.nli.jamass.bean.EventStatus;
 import com.neusoft.soc.nli.jamass.bean.ProtocolType;
 import com.neusoft.soc.nli.jamass.channel.forward.Forward;
 import com.neusoft.soc.nli.jamass.channel.forward.ForwardFactory;
+import com.neusoft.soc.nli.jamass.channel.identify.DevTypeIdentifierNew;
+import com.neusoft.soc.nli.jamass.channel.parse.SyslogParser;
 import com.neusoft.soc.nli.jamass.source.ICollectSource;
 import com.neusoft.soc.nli.jamass.source.TcpNettySource;
 import com.neusoft.soc.nli.jamass.source.UdpNettySource;
@@ -50,7 +52,7 @@ public class AmassEngine {
     /**
      *
      */
-    private Map<String,Forward> sinkMap = new HashMap<>();
+    public Map<String,Forward> sinkMap = new HashMap<>();
     /**
      * 日志队列
      */
@@ -59,6 +61,17 @@ public class AmassEngine {
      * 事件队列
      */
     private Queue<AmassEvent> eventQueue = new LinkedBlockingQueue<>();
+
+    /**
+     * 识别事件缓冲队列
+     */
+    private LinkedBlockingQueue<AmassEvent> eventIdentifyQueue = new LinkedBlockingQueue<>();
+
+    /**
+     * 解析事件缓冲队列
+     */
+    private LinkedBlockingQueue<AmassEvent> eventParseQueue = new LinkedBlockingQueue<>();
+
     /**
      * 自定义解析工具类
      */
@@ -215,6 +228,16 @@ public class AmassEngine {
             logger.info("Sink Forward Thread Start:"+sink.getKey());
         }
 
+        this.getIdentifyPool().execute(new DevTypeIdentifierNew());
+        this.getIdentifyPool().execute(new DevTypeIdentifierNew());
+        this.getIdentifyPool().execute(new DevTypeIdentifierNew());
+        this.getIdentifyPool().execute(new DevTypeIdentifierNew());
+        this.getIdentifyPool().execute(new DevTypeIdentifierNew());
+        this.getParsePool().execute(new SyslogParser());
+        this.getParsePool().execute(new SyslogParser());
+        this.getParsePool().execute(new SyslogParser());
+        this.getParsePool().execute(new SyslogParser());
+        this.getParsePool().execute(new SyslogParser());
     }
 
     private void initThreadPool(){
@@ -229,7 +252,16 @@ public class AmassEngine {
                 }
         ));
 
-        setIdentifyPool(new ThreadPoolExecutor(1,5,0,TimeUnit.MILLISECONDS,
+//        setIdentifyPool(new ThreadPoolExecutor(1,5,0,TimeUnit.MILLISECONDS,
+//                new ArrayBlockingQueue<Runnable>(10000),
+//                new CollectorThreadFactory("identify"),
+//                new RejectedExecutionHandler() {
+//                    public void rejectedExecution(Runnable r,ThreadPoolExecutor executor) {
+//                        return;
+//                    }
+//                }));
+
+        setIdentifyPool(new ThreadPoolExecutor(5,5,0,TimeUnit.MILLISECONDS,
                 new ArrayBlockingQueue<Runnable>(10000),
                 new CollectorThreadFactory("identify"),
                 new RejectedExecutionHandler() {
@@ -238,7 +270,8 @@ public class AmassEngine {
                     }
                 }));
 
-        setParsePool(new ThreadPoolExecutor(1,10,0,TimeUnit.MILLISECONDS,
+
+        setParsePool(new ThreadPoolExecutor(10,10,0,TimeUnit.MILLISECONDS,
                 new ArrayBlockingQueue<Runnable>(10000),
                 new CollectorThreadFactory("parse"),
                 new RejectedExecutionHandler() {
@@ -351,5 +384,21 @@ public class AmassEngine {
 
     public void setKafkaUtil(KafkaUtil kafkaUtil) {
         this.kafkaUtil = kafkaUtil;
+    }
+
+    public LinkedBlockingQueue<AmassEvent> getEventIdentifyQueue() {
+        return eventIdentifyQueue;
+    }
+
+    public void setEventIdentifyQueue(LinkedBlockingQueue<AmassEvent> eventIdentifyQueue) {
+        this.eventIdentifyQueue = eventIdentifyQueue;
+    }
+
+    public LinkedBlockingQueue<AmassEvent> getEventParseQueue() {
+        return eventParseQueue;
+    }
+
+    public void setEventParseQueue(LinkedBlockingQueue<AmassEvent> eventParseQueue) {
+        this.eventParseQueue = eventParseQueue;
     }
 }

@@ -54,7 +54,7 @@ public class Forward implements Runnable{
                     AmassEvent amassEvent = ((LinkedBlockingQueue<AmassEvent>)queue).take();
                     //TODO: 找一共多少个sink 注册
                     for(String sinkName : sinkList){
-                        SinkThread sinkThread = new SinkThread(sinkName,amassEvent.clone());
+                        SinkThread sinkThread = new SinkThread(sinkName,amassEvent);
                         AmassEngine.getInstance().getSinkPool().execute(sinkThread);
                     }
                 } catch (InterruptedException e) {

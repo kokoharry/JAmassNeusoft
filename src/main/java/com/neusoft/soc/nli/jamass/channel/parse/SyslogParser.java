@@ -21,9 +21,9 @@ public class SyslogParser implements IParser {
 
     private AmassEvent amassEvent;
 
-    public SyslogParser(AmassEvent amassEvent){
-        this.amassEvent = amassEvent;
-    }
+//    public SyslogParser(AmassEvent amassEvent){
+//        this.amassEvent = amassEvent;
+//    }
     /**
      * 根据日志格式化规则格式化日志
      * 
@@ -43,7 +43,6 @@ public class SyslogParser implements IParser {
             if (result) {
                 // 修订level
                 if (true) {
-
                     // 重对应ip0
                     if (amassEvent.addr0 == 0 && amassEvent.ip0 != null) {
                         amassEvent.addr0 = 9999999991l;
@@ -100,7 +99,14 @@ public class SyslogParser implements IParser {
 
     @Override
     public void run() {
-        doParse(this.amassEvent);
-        AmassEngine.getInstance().count.incrementAndGet();
+        while(true){
+            try {
+                AmassEvent amassEventTemp = AmassEngine.getInstance().getEventParseQueue().take();
+                doParse(amassEventTemp);
+                AmassEngine.getInstance().count.incrementAndGet();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
