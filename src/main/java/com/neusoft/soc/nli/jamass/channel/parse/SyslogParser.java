@@ -21,9 +21,9 @@ public class SyslogParser implements IParser {
 
     private AmassEvent amassEvent;
 
-//    public SyslogParser(AmassEvent amassEvent){
-//        this.amassEvent = amassEvent;
-//    }
+    public SyslogParser(AmassEvent amassEvent){
+        this.amassEvent = amassEvent;
+    }
     /**
      * 根据日志格式化规则格式化日志
      * 
@@ -43,6 +43,7 @@ public class SyslogParser implements IParser {
             if (result) {
                 // 修订level
                 if (true) {
+
                     // 重对应ip0
                     if (amassEvent.addr0 == 0 && amassEvent.ip0 != null) {
                         amassEvent.addr0 = 9999999991l;
@@ -90,7 +91,7 @@ public class SyslogParser implements IParser {
                 fieldIp.set(amassEvent,
                         NetUtil.normalizeIPV6(NetUtil.textToNumericFormatV6(fieldIp.get(amassEvent).toString())));
             } else {
-                fieldIp.set(amassEvent,NetUtil.getLongValuefromIPStr(fieldIp.get(amassEvent).toString()));
+                fieldAddress.set(amassEvent,NetUtil.getLongValuefromIPStr(fieldIp.get(amassEvent).toString()));
             }
         }catch (Exception e){
             logger.error("IP Address 转换异常",e);
@@ -99,14 +100,7 @@ public class SyslogParser implements IParser {
 
     @Override
     public void run() {
-        while(true){
-            try {
-                AmassEvent amassEventTemp = AmassEngine.getInstance().getEventParseQueue().take();
-                doParse(amassEventTemp);
-                AmassEngine.getInstance().count.incrementAndGet();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+        doParse(this.amassEvent);
+        AmassEngine.getInstance().count.incrementAndGet();
     }
 }

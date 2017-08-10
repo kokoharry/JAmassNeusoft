@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright (c) 2016-2018 Neusoft SOC
+  ~ All rights reserved.
+  ~ Author: lyb
+  -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ParserSqlMapper">
+    <!--<resultMap type="com.luyanbin.code.bean.Class" id="CLassMapper">-->
+        <!--&lt;!&ndash;<id column="_id" property="id"/>&ndash;&gt;-->
+        <!--&lt;!&ndash; 对普通列的映射定义 &ndash;&gt;-->
+        <!--<result column="table_name" property="classname"/>-->
+        <!--<result column="table_comment" property="comment"/>-->
+    <!--</resultMap>-->
+    <!--<resultMap type="com.luyanbin.code.bean.Property" id="PropertyMapper">-->
+        <!--<result column="column_name" property="propertyName"/>-->
+        <!--<result column="data_type" property="type"/>-->
+        <!--<result column="column_comment" property="comment"/>-->
+    <!--</resultMap>-->
+
+    <select id="selectParsePolicy" resultType="com.neusoft.soc.nli.jamass.bean.ParsePolicy">
+        select
+        a.strateid,
+        a.sstatus,
+        a.device_type as deviceType,
+        a.resomode,
+        a.separate
+        from
+        t_strate_event a
+        where
+        a.sstatus = 0
+    </select>
+
+
+    <select id="selectParsePolicyById" resultType="com.neusoft.soc.nli.jamass.bean.ParsePolicy">
+        select
+        a.strateid,
+        a.sstatus,
+        a.device_type as deviceType,
+        a.resomode,
+        a.separate
+        from
+        t_strate_event a
+        where
+        a.sstatus = 0
+        and
+        a.strateid = #{0}
+    </select>
+
+    <select id="selectParseAttrbute" resultType="com.neusoft.soc.nli.jamass.bean.ParseAttrbute">
+        select
+        a.attrid,
+        a.seqid,
+        a.regular,
+        a.paraval,
+        a.paraattr,
+        a.attrname,
+        a.keyattr,
+        a.keyval
+        from
+        t_strate_event_attr a,
+        t_strate_event_attr_rel b
+        where
+        a.attrid = b.attrid
+        and
+        b.strateid = #{0}
+    </select>
+
+    <select id="selectParseEncode" resultType="com.neusoft.soc.nli.jamass.bean.ParseEncode">
+        select
+        c.keyval,
+        c.val
+        from t_strate_event_encode a,
+        t_strate_encode_key_rel b,
+        t_strate_event_keyval c,
+        t_strate_attr_rel d
+        where
+        a.encodeid = b.encodeid
+        and
+        b.keyvalid = c.keyid
+        and
+        b.encodeid = d.encodeid
+        and
+        a.encodetype != 2
+        and
+        d.attrid = #{0}
+    </select>
+</mapper>

@@ -53,10 +53,10 @@ public class AmassMain {
     private static void startAmass() {
         AmassEngine.getInstance().initAmassEngine();
         AmassEngine.getInstance().startThreadAll();
-//        new Timer("Configration File ").schedule(new TimerTask() {
-//            public void run() {
-//              System.out.println(AmassEngine.getInstance().getUnknowLogQueue().size());
-//            }
-//        }, 1*1000, 1*1000);
+        new Timer("Configration File ").schedule(new TimerTask() {
+            public void run() {
+              System.out.println(AmassEngine.getInstance().count);
+            }
+        }, 5*1000, 5*1000);
     }
 }

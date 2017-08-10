@@ -21,9 +21,9 @@ public class ParseFactory {
     public static IParser createParser(AmassEvent amassEvent) {
         switch (amassEvent.getReceiveProtocol()) {
         case SysLog:
-            return new SyslogParser();
+            return new SyslogParser(amassEvent);
         case SnmpTrap:
-            return  new SyslogParser();
+            return  new SyslogParser(amassEvent);
         default:
             return null;
         }

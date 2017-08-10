@@ -102,6 +102,10 @@ public class KafkaUtil {
         return producer;
     }
 
+    public void initKafkaClient(){
+        getKafkaProducer();
+    }
+
     /**
      * 获取消费者对象，获取kafka消费者连接 目前只实现key和value都是String类型
      * @return

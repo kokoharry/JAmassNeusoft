@@ -4,6 +4,7 @@ package com.neusoft.soc.nli.jamass.util;
 import com.neusoft.soc.nli.jamass.bean.AmassEvent;
 import com.neusoft.soc.nli.jamass.bean.ParseScript;
 import com.neusoft.soc.nli.jamass.channel.identify.DevTypeIdentifier;
+import com.neusoft.soc.nli.jamass.channel.parse.ParseService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -51,10 +52,10 @@ public class RegularExpressionUtil {
      * @return
      */
     public boolean initData(){
-//        ParseService parseService = new ParseService();
+        ParseService parseService = new ParseService();
         try{
-//            patternMap = parseService.initPatternMap();
-            logger.debug("自定义解析脚本初始化成功"+patternMap);
+            patternMap = parseService.initPatternMap();
+            logger.info("自定义解析脚本初始化成功"+patternMap);
         }catch (Exception e){
             logger.error("mysql初始化解析脚本数据异常",e);
             return false;
@@ -196,9 +197,6 @@ public class RegularExpressionUtil {
         amassEvent.device = dev_id;
         amassEvent.setMessage(message);
         amassEvent = executeTestExpression(amassEvent,id);
-        //去掉赋值属性
-        amassEvent.device = 0;
-        amassEvent.setMessage("");
         return amassEvent;
     }
 

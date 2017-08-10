@@ -20,18 +20,17 @@ public class SysLogReceiver extends IReceiver {
 
     @Override
     public void receive() {
+        logger.debug("接收到消息：（"+getIp()+":"+getPort()+"）"+getMessage());
         AmassEvent amassEvent = createAmassEvent(getMessage(),getIp(),getPort());
         if(amassEvent != null){
             amassEvent.setReceiveProtocol(ProtocolType.SysLog);
         }
-        IIdentify identify = new DevTypeIdentifier(amassEvent);
         //启动识别线程
         try {
             AmassEngine.getInstance().getEventIdentifyQueue().put(amassEvent);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-//        AmassEngine.getInstance().getIdentifyPool().execute(identify);
     }
 
 }

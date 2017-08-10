@@ -70,7 +70,7 @@ public class RugularParse extends ParseFunction {
         //循环属性解析列表
         for (Map.Entry<String, Pattern> entry : map.entrySet()) {
             Pattern pattern = entry.getValue();
-            Matcher matcher = pattern.matcher(amassEvent.getMessage());
+            Matcher matcher = pattern.matcher(amassEvent.getRaw());
             //只查找一次，如果有则获取
             if(matcher.find()){
                 logger.debug(entry.getKey()+":"+matcher.group(1));

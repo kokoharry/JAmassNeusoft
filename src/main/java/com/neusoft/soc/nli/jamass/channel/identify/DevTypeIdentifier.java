@@ -29,14 +29,6 @@ public class DevTypeIdentifier implements IIdentify{
 
     private AmassEvent amassEvent;
 
-    /**
-     * 构造方法
-     * @param amassEvent
-     */
-    public DevTypeIdentifier(AmassEvent amassEvent){
-        this.setAmassEvent(amassEvent);
-    }
-
     public boolean doIdentify(AmassEvent amassEvent){
         if (amassEvent == null) {
             logger.error("In doIdentify param ce is null");
@@ -87,22 +79,24 @@ public class DevTypeIdentifier implements IIdentify{
 
     @Override
     public void run() {
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        if(doIdentify(this.getAmassEvent())){
-            //识别成功
-            IParser parser = ParseFactory.createParser(this.getAmassEvent());
-            AmassEngine.getInstance().getParsePool().execute(parser);
-
-        }else{
-            //识别失败
-            if(this.getAmassEvent().getStatus() == EventStatus.Unknown){
-                //处理位置日志
+        while(true){
+            try {
+                AmassEvent amassEventTemp = AmassEngine.getInstance().getEventIdentifyQueue().take();
+                if(doIdentify(amassEventTemp)){
+                    //识别成功
+                    IParser parser = ParseFactory.createParser(amassEventTemp);
+                    AmassEngine.getInstance().getParsePool().execute(parser);
+                }else{
+                    //识别失败
+                    if(this.getAmassEvent().getStatus() == EventStatus.Unknown){
+                        //处理位置日志
+                    }
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
+
     }
 
     public AmassEvent getAmassEvent() {

@@ -6,8 +6,7 @@ import com.neusoft.soc.nli.jamass.bean.EventStatus;
 import com.neusoft.soc.nli.jamass.bean.ProtocolType;
 import com.neusoft.soc.nli.jamass.channel.forward.Forward;
 import com.neusoft.soc.nli.jamass.channel.forward.ForwardFactory;
-import com.neusoft.soc.nli.jamass.channel.identify.DevTypeIdentifierNew;
-import com.neusoft.soc.nli.jamass.channel.parse.SyslogParser;
+import com.neusoft.soc.nli.jamass.channel.identify.DevTypeIdentifier;
 import com.neusoft.soc.nli.jamass.source.ICollectSource;
 import com.neusoft.soc.nli.jamass.source.TcpNettySource;
 import com.neusoft.soc.nli.jamass.source.UdpNettySource;
@@ -104,9 +103,11 @@ public class AmassEngine {
         initThreadPool();
         initIpDevMap();
         regularExpressionUtil = RegularExpressionUtil.getInstance();
+        regularExpressionUtil.initData();
         this.setKafkaUtil(KafkaUtil.getInstance(
                 AmassConfigration.getKafkaConfig().get(AmassConstant.SINK_KAFKASINK_CONFIG_SERVER_LIST_NAME)
         ));
+        this.kafkaUtil.initKafkaClient();
     }
 
     /**
@@ -203,7 +204,7 @@ public class AmassEngine {
         DevPatternInfo devPatternInfo2 = new DevPatternInfo();
         devPatternInfo2.setDevId(2);
         DevPatternInfo devPatternInfo3 = new DevPatternInfo();
-        devPatternInfo3.setDevId(3);
+        devPatternInfo3.setDevId(107101); //≤‚ ‘¬Ã√ÀIDS
         Set<DevPatternInfo> set = new LinkedHashSet<>();
         Set<DevPatternInfo> set1 = new LinkedHashSet<>();
         set.add(devPatternInfo);
@@ -228,16 +229,12 @@ public class AmassEngine {
             logger.info("Sink Forward Thread Start:"+sink.getKey());
         }
 
-        this.getIdentifyPool().execute(new DevTypeIdentifierNew());
-        this.getIdentifyPool().execute(new DevTypeIdentifierNew());
-        this.getIdentifyPool().execute(new DevTypeIdentifierNew());
-        this.getIdentifyPool().execute(new DevTypeIdentifierNew());
-        this.getIdentifyPool().execute(new DevTypeIdentifierNew());
-        this.getParsePool().execute(new SyslogParser());
-        this.getParsePool().execute(new SyslogParser());
-        this.getParsePool().execute(new SyslogParser());
-        this.getParsePool().execute(new SyslogParser());
-        this.getParsePool().execute(new SyslogParser());
+        this.getIdentifyPool().execute(new DevTypeIdentifier());
+        this.getIdentifyPool().execute(new DevTypeIdentifier());
+        this.getIdentifyPool().execute(new DevTypeIdentifier());
+        this.getIdentifyPool().execute(new DevTypeIdentifier());
+        this.getIdentifyPool().execute(new DevTypeIdentifier());
+        this.getParsePool().prestartAllCoreThreads();
     }
 
     private void initThreadPool(){
@@ -269,7 +266,6 @@ public class AmassEngine {
                         return;
                     }
                 }));
-
 
         setParsePool(new ThreadPoolExecutor(10,10,0,TimeUnit.MILLISECONDS,
                 new ArrayBlockingQueue<Runnable>(10000),
