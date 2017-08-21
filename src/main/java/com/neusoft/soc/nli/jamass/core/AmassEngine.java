@@ -1,12 +1,10 @@
 package com.neusoft.soc.nli.jamass.core;
 
-import com.neusoft.soc.nli.jamass.bean.AmassEvent;
-import com.neusoft.soc.nli.jamass.bean.DevPatternInfo;
-import com.neusoft.soc.nli.jamass.bean.EventStatus;
-import com.neusoft.soc.nli.jamass.bean.ProtocolType;
+import com.neusoft.soc.nli.jamass.bean.*;
 import com.neusoft.soc.nli.jamass.channel.forward.Forward;
 import com.neusoft.soc.nli.jamass.channel.forward.ForwardFactory;
 import com.neusoft.soc.nli.jamass.channel.identify.DevTypeIdentifier;
+import com.neusoft.soc.nli.jamass.dao.JAmassDao;
 import com.neusoft.soc.nli.jamass.source.ICollectSource;
 import com.neusoft.soc.nli.jamass.source.TcpNettySource;
 import com.neusoft.soc.nli.jamass.source.UdpNettySource;
@@ -81,6 +79,9 @@ public class AmassEngine {
     private Map<String,Set<DevPatternInfo>> ipDevMap;
 
     public AtomicInteger count = new AtomicInteger();
+
+    private int indentifyThreadNum = Integer.parseInt(
+            AmassConfigration.getValuesFromProp("jamass.channel.indentify.thread","5"));
 
     private AmassEngine(){
 
@@ -197,21 +198,17 @@ public class AmassEngine {
         return iCollectSource;
     }
 
+    /**
+     * 初始化IP和设备类型对应关系列表（目前只支持数据库）
+     * TODO: 离线文件方式
+     */
     public void initIpDevMap(){
         ipDevMap = new HashMap<>();
-        DevPatternInfo devPatternInfo = new DevPatternInfo();
-        devPatternInfo.setDevId(1);
-        DevPatternInfo devPatternInfo2 = new DevPatternInfo();
-        devPatternInfo2.setDevId(2);
-        DevPatternInfo devPatternInfo3 = new DevPatternInfo();
-        devPatternInfo3.setDevId(107101); //测试绿盟IDS
-        Set<DevPatternInfo> set = new LinkedHashSet<>();
-        Set<DevPatternInfo> set1 = new LinkedHashSet<>();
-        set.add(devPatternInfo);
-        set.add(devPatternInfo2);
-        set1.add(devPatternInfo3);
-        ipDevMap.put("10.2.4.12",set1);
-        ipDevMap.put("10.2.1.130",set);
+        List<IPAddrDevMap> list = JAmassDao.getInstance().getManualMapping();
+        for(IPAddrDevMap ipDev : list){
+            ipDevMap.put(ipDev.getIp(),ipDev.getPatterns());
+        }
+        logger.info("初始化IP和设备类型初始化完成：" + ipDevMap);
     }
 
     public void startThreadAll(){
@@ -229,15 +226,16 @@ public class AmassEngine {
             logger.info("Sink Forward Thread Start:"+sink.getKey());
         }
 
-        this.getIdentifyPool().execute(new DevTypeIdentifier());
-        this.getIdentifyPool().execute(new DevTypeIdentifier());
-        this.getIdentifyPool().execute(new DevTypeIdentifier());
-        this.getIdentifyPool().execute(new DevTypeIdentifier());
-        this.getIdentifyPool().execute(new DevTypeIdentifier());
+        //启动识别线程
+        for(int i=0;i<indentifyThreadNum;i++){
+            this.getIdentifyPool().execute(new DevTypeIdentifier());
+        }
         this.getParsePool().prestartAllCoreThreads();
     }
 
     private void initThreadPool(){
+
+
 
         setReceiverPool(new ThreadPoolExecutor(1,5,0,TimeUnit.MILLISECONDS,
                 new ArrayBlockingQueue<Runnable>(10000),
@@ -249,16 +247,7 @@ public class AmassEngine {
                 }
         ));
 
-//        setIdentifyPool(new ThreadPoolExecutor(1,5,0,TimeUnit.MILLISECONDS,
-//                new ArrayBlockingQueue<Runnable>(10000),
-//                new CollectorThreadFactory("identify"),
-//                new RejectedExecutionHandler() {
-//                    public void rejectedExecution(Runnable r,ThreadPoolExecutor executor) {
-//                        return;
-//                    }
-//                }));
-
-        setIdentifyPool(new ThreadPoolExecutor(5,5,0,TimeUnit.MILLISECONDS,
+        setIdentifyPool(new ThreadPoolExecutor(indentifyThreadNum,indentifyThreadNum,0,TimeUnit.MILLISECONDS,
                 new ArrayBlockingQueue<Runnable>(10000),
                 new CollectorThreadFactory("identify"),
                 new RejectedExecutionHandler() {

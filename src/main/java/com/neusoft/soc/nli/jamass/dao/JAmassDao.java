@@ -1,9 +1,6 @@
 package com.neusoft.soc.nli.jamass.dao;
 
-import com.neusoft.soc.nli.jamass.bean.ParseAttrbute;
-import com.neusoft.soc.nli.jamass.bean.ParseEncode;
-import com.neusoft.soc.nli.jamass.bean.ParsePolicy;
-import com.neusoft.soc.nli.jamass.bean.ParseScript;
+import com.neusoft.soc.nli.jamass.bean.*;
 import com.neusoft.soc.nli.jamass.util.MybatisDBHelper;
 import com.neusoft.soc.nli.jamass.util.RegularExpressionUtil;
 import org.apache.ibatis.session.SqlSession;
@@ -43,7 +40,7 @@ public class JAmassDao{
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static List<ParsePolicy> selectParsePolicy(){
+    public List<ParsePolicy> selectParsePolicy(){
         List<ParsePolicy> list = null;
         try {
             list = sqlSession.selectList("selectParsePolicy");
@@ -58,7 +55,7 @@ public class JAmassDao{
      *
      * @return
      */
-    public static ParsePolicy selectParsePolicyById(String policyId){
+    public ParsePolicy selectParsePolicyById(String policyId){
         ParsePolicy parsePolicy = null;
         try {
             Object obj = sqlSession.selectOne("selectParsePolicyById", policyId);
@@ -77,7 +74,7 @@ public class JAmassDao{
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static List<ParseAttrbute> selectParseAttrbute(String policyId){
+    public List<ParseAttrbute> selectParseAttrbute(String policyId){
         List<ParseAttrbute> list = null;
         try {
             list = sqlSession.selectList("selectParseAttrbute", policyId);
@@ -92,10 +89,24 @@ public class JAmassDao{
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static List<ParseEncode> selectParseEncode(String attrId){
+    public List<ParseEncode> selectParseEncode(String attrId){
         List<ParseEncode> list = null;
         try {
             list = sqlSession.selectList("selectParseEncode", attrId);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        return list;
+    }
+
+    /**
+     * 获取数据库中IP与设备类型映射，一个设备可能映射多个设备
+     * @return
+     */
+    public List<IPAddrDevMap> getManualMapping() {
+        List<IPAddrDevMap> list = null;
+        try {
+            list = sqlSession.selectList("selectIpDevMappings");
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }

@@ -164,7 +164,7 @@ public class AmassConfigration {
      * @param defaultValue 指定的默认返回值
      * @return
      */
-    private static String getValuesFromProp(String key, String defaultValue) {
+    public static String getValuesFromProp(String key, String defaultValue) {
         String value = defaultValue;
         if (props != null) {
             value = props.getProperty(key, defaultValue);

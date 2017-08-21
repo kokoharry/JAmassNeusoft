@@ -55,7 +55,7 @@ public class AmassMain {
         AmassEngine.getInstance().startThreadAll();
         new Timer("Configration File ").schedule(new TimerTask() {
             public void run() {
-              System.out.println(AmassEngine.getInstance().count);
+//              System.out.println(AmassEngine.getInstance().count);
             }
         }, 5*1000, 5*1000);
     }

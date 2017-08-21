@@ -89,7 +89,7 @@ public class DevTypeIdentifier implements IIdentify{
                 }else{
                     //识别失败
                     if(this.getAmassEvent().getStatus() == EventStatus.Unknown){
-                        //处理位置日志
+                        //TODO：处理未知日志，此处为未识别日志
                     }
                 }
             } catch (InterruptedException e) {

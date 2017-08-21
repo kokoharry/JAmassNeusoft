@@ -48,6 +48,7 @@
         <!--过滤掉spring和hibernate的一些无用的debug信息-->
         <logger name="org.springframework" level="INFO"></logger>
         <logger name="org.hibernate" level="INFO"></logger>
+        <logger name="org.apache.kafka" level="ERROR"></logger>
         <root level="INFO">
             <appender-ref ref="Console"/>
             <!--<appender-ref ref="RollingFileInfo"/>-->
