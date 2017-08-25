@@ -2,6 +2,7 @@ package com.neusoft.soc.nli.jamass.core;
 
 import com.neusoft.soc.nli.jamass.bean.SinkEnum;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -54,6 +55,8 @@ public class AmassConfigration {
                 }
             }
         }, 60 * 1000, 60 * 1000);
+
+//        LogManager.getLogger("kafka.producer").s.setLevel(Level.OFF);
     }
 
     /**

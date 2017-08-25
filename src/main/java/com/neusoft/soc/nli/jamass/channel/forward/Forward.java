@@ -42,6 +42,9 @@ public class Forward implements Runnable{
             case Parsed:
                 queue = AmassEngine.getInstance().getEventQueue();
                 break;
+            case Filted:
+                queue = AmassEngine.getInstance().getFilteLogQueue();
+                break;
             case Identidfied:
                 queue = null;
                 break;

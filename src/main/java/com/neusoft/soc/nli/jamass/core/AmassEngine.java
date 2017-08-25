@@ -51,13 +51,17 @@ public class AmassEngine {
      */
     public Map<String,Forward> sinkMap = new HashMap<>();
     /**
-     * 日志队列
+     * 未知日志队列
      */
-    private Queue<AmassEvent> unknowLogQueue = new LinkedBlockingQueue<>();
+    private Queue<AmassEvent> unknowLogQueue;
+    /**
+     * 过滤日志队列
+     */
+    private Queue<AmassEvent> filteLogQueue;
     /**
      * 事件队列
      */
-    private Queue<AmassEvent> eventQueue = new LinkedBlockingQueue<>();
+    private Queue<AmassEvent> eventQueue;
 
     /**
      * 识别事件缓冲队列
@@ -81,7 +85,16 @@ public class AmassEngine {
     public AtomicInteger count = new AtomicInteger();
 
     private int indentifyThreadNum = Integer.parseInt(
-            AmassConfigration.getValuesFromProp("jamass.channel.indentify.thread","5"));
+            AmassConfigration.getValuesFromProp(AmassConstant.CHANNEL_CONFIG_INDENTIFY_THREAD_NUM,"5"));
+
+    private int filteQueueSize = Integer.parseInt(
+            AmassConfigration.getValuesFromProp(AmassConstant.ENGINE_FILTER_CACHE_SIZE,"10000"));
+
+    private int unknownQueueSize = Integer.parseInt(
+            AmassConfigration.getValuesFromProp(AmassConstant.ENGINE_UNKNOWN_CACHE_SIZE,"10000"));
+
+    private int eventQueueSize = Integer.parseInt(
+            AmassConfigration.getValuesFromProp(AmassConstant.ENGINE_RECIVE_CACHE_SIZE,"100000"));
 
     private AmassEngine(){
 
@@ -99,6 +112,7 @@ public class AmassEngine {
      * JAmass引擎初始化
      */
     public void initAmassEngine(){
+        initQueue();
         initJamassSources();
         initJamassSinks();
         initThreadPool();
@@ -109,6 +123,15 @@ public class AmassEngine {
                 AmassConfigration.getKafkaConfig().get(AmassConstant.SINK_KAFKASINK_CONFIG_SERVER_LIST_NAME)
         ));
         this.kafkaUtil.initKafkaClient();
+    }
+
+    /**
+     * 初始化接受source
+     */
+    public void initQueue(){
+        this.setFilteLogQueue(new LinkedBlockingQueue<AmassEvent>(filteQueueSize));
+        this.setUnknowLogQueue(new LinkedBlockingQueue<AmassEvent>(unknownQueueSize));
+        this.setEventQueue(new LinkedBlockingQueue<AmassEvent>(eventQueueSize));
     }
 
     /**
@@ -219,6 +242,13 @@ public class AmassEngine {
             logger.info("Source Thread Start:"+source.getKey());
         }
 
+        //启动channel 识别线程
+        for(int i=0;i<indentifyThreadNum;i++){
+            this.getIdentifyPool().execute(new DevTypeIdentifier());
+        }
+        logger.info("channel 启动识别线程："+indentifyThreadNum+"个，DevTypeIdentifier");
+        this.getParsePool().prestartAllCoreThreads();
+
         //启动 转发 sink 线程
         for (Map.Entry<String, Forward> sink : sinkMap.entrySet()) {
             Thread thread = new Thread(sink.getValue());
@@ -226,16 +256,9 @@ public class AmassEngine {
             logger.info("Sink Forward Thread Start:"+sink.getKey());
         }
 
-        //启动识别线程
-        for(int i=0;i<indentifyThreadNum;i++){
-            this.getIdentifyPool().execute(new DevTypeIdentifier());
-        }
-        this.getParsePool().prestartAllCoreThreads();
     }
 
     private void initThreadPool(){
-
-
 
         setReceiverPool(new ThreadPoolExecutor(1,5,0,TimeUnit.MILLISECONDS,
                 new ArrayBlockingQueue<Runnable>(10000),
@@ -276,7 +299,6 @@ public class AmassEngine {
 
 
     static class CollectorThreadFactory implements ThreadFactory {
-        static final AtomicInteger poolNumber = new AtomicInteger(1);
         final ThreadGroup group;
         final AtomicInteger threadNumber = new AtomicInteger(1);
         final String namePrefix;
@@ -385,5 +407,13 @@ public class AmassEngine {
 
     public void setEventParseQueue(LinkedBlockingQueue<AmassEvent> eventParseQueue) {
         this.eventParseQueue = eventParseQueue;
+    }
+
+    public Queue<AmassEvent> getFilteLogQueue() {
+        return filteLogQueue;
+    }
+
+    public void setFilteLogQueue(Queue<AmassEvent> filteLogQueue) {
+        this.filteLogQueue = filteLogQueue;
     }
 }

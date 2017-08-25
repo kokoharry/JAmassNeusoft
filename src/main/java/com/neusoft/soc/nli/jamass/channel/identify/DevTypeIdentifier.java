@@ -12,6 +12,7 @@ import com.neusoft.soc.nli.jamass.bean.DevPatternInfo;
 import com.neusoft.soc.nli.jamass.bean.EventStatus;
 import com.neusoft.soc.nli.jamass.channel.parse.IParser;
 import com.neusoft.soc.nli.jamass.channel.parse.ParseFactory;
+import com.neusoft.soc.nli.jamass.core.AmassConstant;
 import com.neusoft.soc.nli.jamass.core.AmassEngine;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,8 +40,8 @@ public class DevTypeIdentifier implements IIdentify{
         if (ipDevMaps != null && ipDevMaps.size() > 0 && ipDevMaps.containsKey(amassEvent.getIp0())) {
             // 映射关系中含有对应的IP
             Set<DevPatternInfo> set = ipDevMaps.get(amassEvent.getIp0());
-            if(set != null && set.size() == 1){
-                //正常情况下一个IP映射一种设备类型 for只是执行一次，为了方便获取set中的值
+            if(set != null && set.size() >= 1){
+                //正常情况下一个IP映射一种设备类型 ,一个IP可以映射多种设备类型，如果存在复杂情况通过正则表达式来判断设备类型
                 for(DevPatternInfo devPatternInfo : set){
                     if(devPatternInfo.getPattern() == null || checkDevPattern(devPatternInfo.getPattern(),amassEvent.getRaw())){
                         //没有设置日志全局判定正则,或者设置了正则，通过验证，查找到设备类型
@@ -49,12 +50,14 @@ public class DevTypeIdentifier implements IIdentify{
                         return true;
                     }
                 }
+                amassEvent.setErrorMsg(AmassConstant.INDENTIFY_ERROR_MSG_FAIL + amassEvent.getIp0());
             }else{
-                //TODO:一个IP对应的多个设备类型
-
+                amassEvent.setErrorMsg(AmassConstant.INDENTIFY_ERROR_MSG_NO_DEVPATTERN + amassEvent.getIp0());
             }
+        }else{
+            amassEvent.setErrorMsg(AmassConstant.INDENTIFY_ERROR_MSG_NO_IP + amassEvent.getIp0());
         }
-        //映射关系中无法识别的设备类型，为 位置日志
+        //映射关系中无法识别的设备类型，为 未知日志
         amassEvent.status = EventStatus.Unknown;
         return false;
     }
@@ -88,12 +91,15 @@ public class DevTypeIdentifier implements IIdentify{
                     AmassEngine.getInstance().getParsePool().execute(parser);
                 }else{
                     //识别失败
-                    if(this.getAmassEvent().getStatus() == EventStatus.Unknown){
-                        //TODO：处理未知日志，此处为未识别日志
+                    if(amassEventTemp.getStatus() == EventStatus.Unknown){
+                        if(!AmassEngine.getInstance().getUnknowLogQueue().offer(amassEventTemp)){
+                            //提交未知队列失败，未知日志队列缓冲满了 未知太多或者没有未知处理sink
+                            logger.debug("未知队列已经饱和，不继续进行保存，位置队列长度：" + AmassEngine.getInstance().getUnknowLogQueue().size());
+                        }
                     }
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.error("设备识别线程异常",e);
             }
         }
 

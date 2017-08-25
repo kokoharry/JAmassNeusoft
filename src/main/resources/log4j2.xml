@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--设置log4j2的自身log级别为warn-->
-<configuration status="INFO">
+<configuration status="OFF">
 
     <appenders>
         <console name="Console" target="SYSTEM_OUT">
@@ -46,9 +46,6 @@
 
     <loggers>
         <!--过滤掉spring和hibernate的一些无用的debug信息-->
-        <logger name="org.springframework" level="INFO"></logger>
-        <logger name="org.hibernate" level="INFO"></logger>
-        <logger name="org.apache.kafka" level="ERROR"></logger>
         <root level="INFO">
             <appender-ref ref="Console"/>
             <!--<appender-ref ref="RollingFileInfo"/>-->

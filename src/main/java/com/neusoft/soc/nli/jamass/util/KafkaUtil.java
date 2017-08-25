@@ -17,6 +17,11 @@ import java.util.Properties;
 public class KafkaUtil {
 
     public static final Logger logger = LogManager.getLogger(KafkaUtil.class);
+
+
+    static {
+
+    }
     /**
      * 拉取消息间隔 ms
      */

@@ -20,7 +20,7 @@ public class SysLogReceiver extends IReceiver {
 
     @Override
     public void receive() {
-        logger.debug("接收到消息：（"+getIp()+":"+getPort()+"）"+getMessage());
+        logger.debug("SyslogReceiver接收到消息：（"+getIp()+":"+getPort()+"）"+getMessage());
         AmassEvent amassEvent = createAmassEvent(getMessage(),getIp(),getPort());
         if(amassEvent != null){
             amassEvent.setReceiveProtocol(ProtocolType.SysLog);

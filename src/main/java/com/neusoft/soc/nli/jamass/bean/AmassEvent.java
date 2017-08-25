@@ -392,6 +392,16 @@ public class AmassEvent implements Serializable ,Cloneable{
 
     public long receiveTime;
 
+    public String errorMsg;
+
+    public String getErrorMsg() {
+        return errorMsg;
+    }
+
+    public void setErrorMsg(String errorMsg) {
+        this.errorMsg = errorMsg;
+    }
+
     public String getId() {
         return id;
     }

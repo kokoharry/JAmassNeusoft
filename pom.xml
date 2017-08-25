@@ -8,6 +8,13 @@
     <artifactId>JAmass</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <properties>
+        <slf4j.version>1.7.10</slf4j.version>
+        <log4j2.version>2.3</log4j2.version>
+        <mybatis-spring.version>1.2.2</mybatis-spring.version>
+        <mybatis.version>3.2.8</mybatis.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -45,6 +52,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.apache.logging.log4j</groupId>-->
+            <!--<artifactId>log4j-slf4j-impl</artifactId>-->
+            <!--<version>2.8.2</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
@@ -53,7 +65,7 @@
         <dependency>
             <groupId>org.mybatis</groupId>
             <artifactId>mybatis</artifactId>
-            <version>3.2.1</version>
+            <version>3.2.8</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
